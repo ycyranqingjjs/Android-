@@ -1,0 +1,94 @@
+
+一、Linux 监听APP卸载
+
+监听APP卸载方法：
+1.广播    android.intent.action.PACKAGE_REMOVED   卸载后广播也不存在了
+
+2.监听文件是否存在
+   data/data/包名  是否存在   开启线程循环监听    
+   
+3. 新建一个进程   （反编译360手机助手 有相应的.so库）
+      
+	  还可以监听APP利用WPS等第三方APP打开文档的保存等的操作  --给文件设置监听
+	  Linux监听文件是否被删除
+	  
+	  看fileObserver源码  --> JIN方法 native init  -->看frameworks源码 -->fileObserver.cpp  --->native的init()方法
+	  inotify_init方法
+	  
+	  
+	  主要参考fileObserver的native代码
+	  
+	  
+	  Java_com_ycy_unstall_MainActivity_stringFromJNI(
+        JNIEnv *env,
+        jobject /* this */) {
+
+    pid_t pid = fork();  //开辟进程  最好循环判断是否包含当前进程  保存pid
+
+    if(pid<0)          //新建成功        主要参考 fileObserver对应的native相应的方法
+    {
+        int fileDesc = inotify_init();
+        if(fileDesc<0)
+        {
+            //初始化失败 释放资源
+            exit(0);
+        }
+        int watch = inotify_add_watch(fileDesc,"/data/data/com.",IN_DELETE);  //监听
+        if(watch<0)
+        {
+            //监听失败
+            exit(0);
+        }
+        void *p_buf = malloc(sizeof(struct inotify_event));
+        size_t readByte = read(fileDesc,p_buf, sizeof(struct inotify_event));
+        free(p_buf);
+
+        //在这里可以跳转网页
+        execlp("am","am","start","-user","0","-a","android.intent.action.VIEW","-d","http://www.dongnao.com");
+        exit(0);
+
+    } else if(pid>0)
+    {
+        //父进程
+    }
+	}
+	
+	
+	
+	
+	
+	
+	
+	二、用户行为统计与性能监测的AOP架构设计
+	
+	如果每个功能都去检测 就会拷贝很多的代码
+	
+	单一职责
+	
+	1.出现大量使用这个功能的地方
+	
+	2.代码耦合
+	
+	AOP  aspect oriented programming  将某个方面的功能与一批对象隔离，单独面向一个功能开发
+	
+	统一实现一个功能为很多的地方调用使用
+	例如：权限处理  用户监测  登录后功能使用  等等
+	一般：
+	     javac工具
+	java ------> .class
+
+	切面编程：
+		 aspectj tolls     aspectj扩展了java  aspectj编译器能生成.class
+	java ------> .class
+	
+	
+	
+	三、
+	
+	
+	
+	
+	
+	
+	
+	
